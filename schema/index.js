@@ -17,13 +17,10 @@ fs.readdirSync(__dirname).forEach((file) => {
 })
 
 // merge graphql types
-const typesArray = fileLoader(path.join(__dirname, '/**/model/*.graphql'))
 const result = []
 let resolvers = []
 let extra = {}
 let query = {}
-
-
 
 
 //import resolver (query and mutation)
@@ -46,33 +43,11 @@ let schema = result.reduce((a, b) => {
 }, {});
 
 
-// split query from extra , extra is used for relations
-
-Object.entries(schema['Query'][0]).forEach((k) => {
-    if (Object.keys(k[1]).length === 0) {
-        query[k[0]] = k[1]
-    } else {
-        extra[k[0]] = k[1]
-    }
-})
-
-
-// if extra exist merge in resolver
-if (!(Object.entries(extra).length === 0 && extra.constructor === Object)) {
-    resolvers = Object.assign({}, resolvers, extra)
-}
-
-// if subscription exist merge in resolver
-if (!(Object.entries(schema['Subscription'][0]).length === 0 && schema['Subscription'][0].constructor === Object)) {
-    resolvers = Object.assign({}, resolvers, { 'Subscription': schema['Subscription'][0] })
-}
-
-resolvers = Object.assign({}, resolvers, { 'Query': query })
-resolvers = Object.assign({}, resolvers, { 'Mutation': schema['Mutation'][0] })
-
-
-module.exports = {
-    typeDefs: mergeTypes(typesArray, { all: true }),
-    resolvers: resolvers,
-}
+if (Object.entries(schema).length !== 0) {
+    // split query from extra , extra is used for relations
+    Object.entries(schema['Query'][0]).forEach((k) => {
+        if (Object.keys(k[1]).length === 0) {
+            query[k[0]] = k[1]
+        } else {
+            extra[k[0]] = k[1]
 
